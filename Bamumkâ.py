@@ -1,34 +1,30 @@
 import random
+import sys
 
 WordCount = 1000
 
-A = [
-		["a", "a", "a", "a", "â", "a", "ä", "a", "á"],
-		["aa", "aa", "aa", "aa", "âa", "aa", "äa", "aa", "áa"]
-	]
-I = [
-		["i", "i", "i", "i", "î", "i", "ï", "i", "í"],
-		["ii", "ii", "ii", "ii", "îi", "ii", "ïi", "ii", "íi"]
-	]
-U = [
-		["u", "u", "u", "u", "û", "u", "ü", "u", "ú"],
-		["uu", "uu", "uu", "uu", "ûu", "uu", "üu", "uu", "úu"]
-	]
+A = ["a", "aa"]
+I = ["i", "ii"]
+U = ["u", "uu"]
 
 Vowels = [A, I, U]
-Onset = ["b", "d", "t", "g", "k", "z", "s", "r", "n", "m",""]
+Onset = ["*", "b", "d", "t", "g", "k", "*", "z", "s", "r", "n", "m", "*", "w", "h", "y"]
+Why = ["w", "h", "y"]
 Coda = ["r", "n", "m"]
-
-
-
-
 
 def BuildSyllable(VowelHarmony, Tonicity):
 	# Picking starting consonant, if any
 	T_Onset = random.choice(Onset)
+	Why_selector = random.randint(1, 11)
+
+	if (T_Onset not in Why and T_Onset != "*") and Why_selector % 3 == 0:
+		T_approx = random.choice(Why)
+	else:
+		T_approx = ""
+
 
 	# Is the syllable open or closed
-	HasCoda = random.randint(1,3)
+	HasCoda = random.randint(1, 3)
 	if HasCoda == 1 or HasCoda == 3:
 		T_Coda = ""
 	else:
@@ -46,39 +42,39 @@ def BuildSyllable(VowelHarmony, Tonicity):
 		if VowelSelector == 1 or VowelSelector == 3:
 			if VowelHarmony == 1:
 				if VowelLength == 1:
-					T_Nucleus = random.choice(I[1])
+					T_Nucleus = I[0]
 				else:
-					T_Nucleus = random.choice(I[0])
+					T_Nucleus = I[1]
 			else:
 				if VowelLength == 1:
-					T_Nucleus = random.choice(U[1])
+					T_Nucleus = U[1]
 				else:
-					T_Nucleus = random.choice(U[0])
+					T_Nucleus = U[0]
 		else:
 			if VowelLength == 1:
-				T_Nucleus = random.choice(A[1])
+				T_Nucleus = A[1]
 			else:
-				T_Nucleus = random.choice(A[0])
+				T_Nucleus = A[0]
 	else:
 		if VowelSelector == 1 or VowelSelector == 3:
 			if VowelHarmony == 1:
 				if VowelLength == 1:
-					T_Nucleus = random.choice(I[0])
+					T_Nucleus = I[0]
 				else:
-					T_Nucleus = random.choice(I[1])
+					T_Nucleus = I[1]
 			else:
 				if VowelLength == 1:
-					T_Nucleus = random.choice(U[0])
+					T_Nucleus = U[0]
 				else:
-					T_Nucleus = random.choice(U[1])
+					T_Nucleus = U[1]
 		else:
 			if VowelLength == 1:
-				T_Nucleus = random.choice(A[0])
+				T_Nucleus = A[0]
 			else:
-				T_Nucleus = random.choice(A[1])
+				T_Nucleus = A[1]
 
 	# Put it together	
-	Syllable = T_Onset + T_Nucleus + T_Coda 
+	Syllable = T_Onset + T_approx + T_Nucleus + T_Coda
 	return Syllable
 
 WordArray = []
@@ -88,22 +84,38 @@ while counter < WordCount:
 	# VowelHarmony 1 = I, 2 = U
 	VowelHarmony = random.randint(1, 2)
 	if NumberOfSyllables == 1:
-		Word = BuildSyllable(VowelHarmony, 1) + ", "
-		#print(Word)
+		Word = BuildSyllable(VowelHarmony, 1)
+		Tonic = Word
+		PreTonic = ""
+		PostTonic = ""
+
 	elif NumberOfSyllables == 2:
 		Tonic = BuildSyllable(VowelHarmony,1)
 		PreTonic = BuildSyllable(VowelHarmony,0)
-		Word = PreTonic + Tonic.upper() + ", "
-		#print(Word)
+		PostTonic = ""
+		Word = PreTonic + Tonic.upper()
+
 	else:
 		Tonic = BuildSyllable(VowelHarmony,1)
 		PreTonic = BuildSyllable(VowelHarmony,0)
 		PostTonic = BuildSyllable(VowelHarmony,0)
 		Word = PreTonic + Tonic.upper() + PostTonic
-		#print(Word)
+
 	if Word in WordArray:
 		continue
 	else:
-		WordArray.append(Word)
+		WordObject = {
+			"Word": Word,
+			"PreTonic": PreTonic,
+			"Tonic": Tonic,
+			"PostTonic": PostTonic
+		}
+		WordArray.append(WordObject)
 		counter += 1
 print(WordArray)
+
+f = open("voc.txt", "a")
+for wordObj in WordArray:
+	f.write(wordObj["Word"] + ", " + wordObj["PreTonic"] + ", " + wordObj["Tonic"] + ", " + wordObj["PostTonic"] + "\r")
+f.close()
+
