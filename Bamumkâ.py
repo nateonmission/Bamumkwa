@@ -1,16 +1,18 @@
 import random
-import sys
 
 WordCount = 1000
 
-A = ["a", "aa"]
-I = ["i", "ii"]
-U = ["u", "uu"]
+A = ["a", "a:"]
+I = ["i", "i:"]
+U = ["u", "u:"]
 
 Vowels = [A, I, U]
 Onset = ["*", "b", "d", "t", "g", "k", "*", "z", "s", "r", "n", "m", "*", "w", "h", "y"]
 Why = ["w", "h", "y"]
 Coda = ["r", "n", "m"]
+
+MinSyl = 1
+MaxSyl = 3
 
 def BuildSyllable(VowelHarmony, Tonicity):
 	# Picking starting consonant, if any
@@ -37,7 +39,7 @@ def BuildSyllable(VowelHarmony, Tonicity):
 		VowelLength = 0
 
 	# Pick the Nucleus
-	VowelSelector = random.randint(1,3)
+	VowelSelector = random.randint(1, 3)
 	if Tonicity == 1:
 		if VowelSelector == 1 or VowelSelector == 3:
 			if VowelHarmony == 1:
@@ -73,14 +75,45 @@ def BuildSyllable(VowelHarmony, Tonicity):
 			else:
 				T_Nucleus = A[1]
 
-	# Put it together	
+	# Put it together
 	Syllable = T_Onset + T_approx + T_Nucleus + T_Coda
 	return Syllable
 
-WordArray = []
-counter = 1
-while counter < WordCount:
-	NumberOfSyllables = random.randint(1,3)
+def Ortho(Word):
+	NewWord = ""
+	for i in range(0, len(Word)):
+		if Word[i] == "w" and Word[i+1] == "a":
+				NewLetter = "â"
+		elif Word[i] == "w" and Word[i+1] == "i":
+				NewLetter = "î"
+		elif Word[i] == "w" and Word[i+1] == "u":
+				NewLetter = "û"
+		elif Word[i] == "h" and Word[i+1] == "a":
+				NewLetter = "ä"
+		elif Word[i] == "h" and Word[i+1] == "i":
+				NewLetter = "ï"
+		elif Word[i] == "h" and Word[i+1] == "u":
+				NewLetter = "ü"
+		elif Word[i] == "y" and Word[i+1] == "a":
+				NewLetter = "á"
+		elif Word[i] == "y" and Word[i+1] == "i":
+				NewLetter = "í"
+		elif Word[i] == "y" and Word[i+1] == "u":
+				NewLetter = "ú"
+		elif Word[i] in A and Word[i-1] in Why:
+			continue
+		elif Word[i] in I and Word[i-1] in Why:
+			continue
+		elif Word[i] in U and Word[i-1] in Why:
+			continue
+		elif Word[i] == "*":
+			continue
+		else:
+			NewLetter = Word[i]
+		NewWord += NewLetter
+	return NewWord
+
+def BuildWord(NumberOfSyllables):
 	# VowelHarmony 1 = I, 2 = U
 	VowelHarmony = random.randint(1, 2)
 	if NumberOfSyllables == 1:
@@ -101,21 +134,30 @@ while counter < WordCount:
 		PostTonic = BuildSyllable(VowelHarmony,0)
 		Word = PreTonic + Tonic.upper() + PostTonic
 
-	if Word in WordArray:
+	Orthography = Ortho(Word.lower())
+	NewWordObject = {
+		"Roman": Word,
+		"PreTonic": PreTonic,
+		"Tonic": Tonic,
+		"PostTonic": PostTonic,
+		"Orthography": Orthography
+	}
+	return NewWordObject
+
+
+WordArray = []
+counter = 1
+while counter < WordCount:
+	NumberOfSyllables = random.randint(MinSyl, MaxSyl)
+	WordObject = BuildWord(NumberOfSyllables)
+	if WordObject in WordArray:
 		continue
 	else:
-		WordObject = {
-			"Word": Word,
-			"PreTonic": PreTonic,
-			"Tonic": Tonic,
-			"PostTonic": PostTonic
-		}
 		WordArray.append(WordObject)
 		counter += 1
 print(WordArray)
 
 f = open("voc.txt", "a")
 for wordObj in WordArray:
-	f.write(wordObj["Word"] + ", " + wordObj["PreTonic"] + ", " + wordObj["Tonic"] + ", " + wordObj["PostTonic"] + "\r")
+	f.write(wordObj["Roman"] + ", " + wordObj["PreTonic"] + ", " + wordObj["Tonic"] + ", " + wordObj["PostTonic"] + "\r")
 f.close()
-
