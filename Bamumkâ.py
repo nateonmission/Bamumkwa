@@ -122,26 +122,26 @@ def build_word(bw_number_of_syllables):
         word = build_syllable(vowel_harmony, 1)
         tonic = word
         pre_tonic = ""
-        post_tonic = ""
+        pro_pre_tonic = ""
 
     elif bw_number_of_syllables == 2:
-        tonic = build_syllable(vowel_harmony, 1)
+        pro_pre_tonic = ""
         pre_tonic = build_syllable(vowel_harmony, 0)
-        post_tonic = ""
+        tonic = build_syllable(vowel_harmony, 1)
         word = pre_tonic + tonic.upper()
 
     else:
-        tonic = build_syllable(vowel_harmony, 1)
+        pro_pre_tonic = build_syllable(vowel_harmony, 0)
         pre_tonic = build_syllable(vowel_harmony, 0)
-        post_tonic = build_syllable(vowel_harmony, 0)
-        word = pre_tonic + tonic.upper() + post_tonic
+        tonic = build_syllable(vowel_harmony, 1)
+        word = pro_pre_tonic + pre_tonic + tonic.upper()
 
     orthography = in_world_orthography(word.lower())
     new_word_object = {
         "roman": word,
+        "pro_pre_tonic": pro_pre_tonic,
         "pre_tonic": pre_tonic,
         "tonic": tonic,
-        "post_tonic": post_tonic,
         "orthography": orthography
     }
     
@@ -163,9 +163,10 @@ print(word_array)
 f = open("voc.txt", "a")
 for each_word_object in word_array:
     f.write(
-        each_word_object["roman"] + ", " + 
+        each_word_object["roman"] + ", " +
+        each_word_object["pro_pre_tonic"] +
         each_word_object["pre_tonic"] + ", " + 
-        each_word_object["tonic"] + ", " + 
-        each_word_object["post_tonic"] + "\r"
+        each_word_object["tonic"] +
+        ", " + "\r"
     )
 f.close()
