@@ -39,9 +39,9 @@ def build_syllable(vowel_harmony, tonicity):
         vowel_length = 0
 
     # Pick the Nucleus
-    vowel_selector = random.randint(1, 3)
+    vowel_selector = random.randint(1, 2)
     if tonicity == 1:
-        if vowel_selector == 1 or vowel_selector == 3:
+        if vowel_selector == 1:  
             if vowel_harmony == 1:
                 if vowel_length == 1:
                     syl_nucleus = vowel_i[0]
